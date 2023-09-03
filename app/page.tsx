@@ -1,10 +1,6 @@
-import { revalidateTag } from "next/cache";
-
-export interface Product {
-  id?: number;
-  product: string;
-  price: string;
-}
+import { Product } from "@/type";
+import { addProductToDatabase } from "@/actions/serverActions";
+import AddProductButton from "@/components/AddProductButton";
 
 export default async function Home() {
   const res = await fetch(
@@ -12,37 +8,17 @@ export default async function Home() {
     {
       cache: "no-cache",
       next: {
-        tags: ["products"],
+        // tags: ["products"],
+        tags: ["newproducts"],
       },
     }
   );
-
-  const addProductToDatabase = async (e: FormData) => {
-    "use server";
-    const product = e.get("product")?.toString();
-    const price = e.get("price")?.toString();
-
-    if (!product || !price) return;
-    const newProduct = {
-      product,
-      price,
-    };
-
-    await fetch("https://64f47dda932537f4051a69af.mockapi.io/products", {
-      method: "POST",
-      body: JSON.stringify(newProduct),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    revalidateTag("products");
-  };
 
   const products: Product[] = await res.json();
   return (
     <main className="flex min-h-screen text-center flex-col gap-8 items-center p-8">
       <h1 className="text-3xl font-bold">Product Warehouse</h1>
+      <AddProductButton />
       <form
         action={addProductToDatabase}
         className="flex flex-col items-center gap-5"
